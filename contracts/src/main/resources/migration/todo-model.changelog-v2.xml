@@ -3,8 +3,13 @@
                    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
-
-    <include file="migration/todo-model.changelog-v1.xml"/>
-    <include file="migration/todo-model.changelog-v2.xml"/>
-	
+    <changeSet author="R3.Corda" id="create_todo_model_state">
+        <createTable tableName="todo_model2">
+            <column name="output_index" type="INT"/>
+            <column name="transaction_id" type="NVARCHAR(64)"/>
+            <column name="assigned_to" type="NVARCHAR(255)"/>
+            <column name="task" type="NVARCHAR(64)"/>
+            <column name="id" type="NVARCHAR(64)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
