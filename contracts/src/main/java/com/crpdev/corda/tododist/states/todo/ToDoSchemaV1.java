@@ -2,7 +2,9 @@ package com.crpdev.corda.tododist.states.todo;
 
 import net.corda.core.schemas.MappedSchema;
 import net.corda.core.schemas.PersistentState;
+import org.hibernate.annotations.Type;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -23,6 +25,7 @@ public class ToDoSchemaV1 extends MappedSchema {
         private final String task;
 
         @Column(name = "id")
+        @Type(type = "uuid-char")
         private final UUID linearId;
 
         public ToDoModel (String task, UUID linearId){
@@ -37,6 +40,12 @@ public class ToDoSchemaV1 extends MappedSchema {
         public UUID getLinearId() {
             return linearId;
         }
+    }
+
+    @Nullable
+    @Override
+    public String getMigrationResource() {
+        return "tododist.changelog-master";
     }
 
 }
