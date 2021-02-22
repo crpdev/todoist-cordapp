@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable;
 import com.crpdev.corda.tododist.contracts.Command;
 import com.crpdev.corda.tododist.states.ToDoState;
 import net.corda.core.contracts.StateAndRef;
+import net.corda.core.contracts.TimeWindow;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.node.ServiceHub;
@@ -13,6 +14,7 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 
 import java.security.PublicKey;
+import java.time.Instant;
 import java.util.*;
 
 @InitiatingFlow
@@ -43,16 +45,20 @@ public class AssignToDoInitiatorFlow extends FlowLogic<Void> {
 
         Set<Party> parties = serviceHub.getIdentityService().partiesFromName(assignedTo, true);
         Party assignedToParty = parties.iterator().next();
-        System.out.printf("New Assignee: %s", assignedToParty.getName());
+        System.out.printf("New Assignee: %s", assignedToParty.getName().getOrganisation());
         ToDoState newToDoState = toDoState.assignTo(assignedToParty);
 
-        System.out.printf("Task Linear Id: %s, Task Description: %s, Task Reporter: %s, Task Assignee: %s", newToDoState.getLinearId(), newToDoState.getTaskDescription(), newToDoState.getAssignedBy().getName(), newToDoState.getAssignedTo().getName());
+        System.out.printf("Task Linear Id: %s, Task Description: %s, Task Reporter: %s, Task Assignee: %s", newToDoState.getLinearId(), newToDoState.getTaskDescription(), newToDoState.getAssignedBy().getName().getOrganisation(), newToDoState.getAssignedTo().getName().getOrganisation());
 
         PublicKey myKey = getOurIdentity().getOwningKey();
+        PublicKey counterPartyKey = assignedToParty.getOwningKey();
+        List<PublicKey> signers = Arrays.asList(myKey, counterPartyKey);
         TransactionBuilder tx = new TransactionBuilder(notary)
                 .addInputState(currentToDoStateAndRef)
                 .addOutputState(newToDoState)
-                .addCommand(new Command.AssignToDoCommand(), myKey, assignedToParty.getOwningKey());
+                .addCommand(new Command.AssignToDoCommand(), signers)
+                .setTimeWindow(TimeWindow.between(Instant.now(), Instant.now().plusSeconds(10)));
+
         SignedTransaction partialSignedTx = getServiceHub().signInitialTransaction(tx);
 
         FlowSession assignedToSession = initiateFlow(assignedToParty);
@@ -65,6 +71,7 @@ public class AssignToDoInitiatorFlow extends FlowLogic<Void> {
 
 
         subFlow(new FinalityFlow(fullySignedTx, Arrays.asList(assignedToSession)));
+        System.out.println("Linear Id: " + toDoState.getLinearId().getId());
         return null;
     }
 }

@@ -7,5 +7,6 @@ public interface Command {
     class CreateToDoCommand implements CommandData {}
     class AssignToDoCommand implements CommandData {}
     class MarkCompleteToDoCommand implements CommandData {}
+    class AttachDocToDoCommand implements CommandData {}
 
 }

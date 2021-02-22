@@ -37,7 +37,7 @@ public class CreateToDoFlow extends FlowLogic<SignedTransaction> {
         SignedTransaction stx = getServiceHub().signInitialTransaction(tx);
 
         subFlow(new FinalityFlow(stx, Collections.<FlowSession>emptySet()));
-
+        System.out.println("Linear Id: " + ts.getLinearId().getId());
         return null;
     }
 }
